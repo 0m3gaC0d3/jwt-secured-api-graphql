@@ -1,0 +1,15 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: true
+  OmegaCode\JwtSecuredApiGraphQL\:
+    resource: '../src/*'
+    exclude: '../src/{GraphQL},Kernel.php'
+
+  OmegaCode\JwtSecuredApiGraphQL\Action\GraphQL\IndexAction:
+    arguments:
+      $container: '@service_container'
+
+  OmegaCode\JwtSecuredApiGraphQL\GraphQL\ResolverRegistry:
+

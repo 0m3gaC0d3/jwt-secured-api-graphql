@@ -1,0 +1,8 @@
+routes:
+  -
+    name: graphql.index
+    route: /graphql
+    methods: [get, post]
+    action: OmegaCode\JwtSecuredApiGraphQL\Action\GraphQL\IndexAction
+    middlewares:
+      - OmegaCode\JwtSecuredApiGraphQL\Middleware\SchemaResolverInjectionMiddleware

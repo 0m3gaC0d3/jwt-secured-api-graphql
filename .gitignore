@@ -1,0 +1,15 @@
+/vendor/
+/var/cache/
+!/var/cache/.gitkeep
+.env
+vendor/
+composer.lock
+composer.phar
+keys/*
+!keys/.gitkeep
+bin/*
+!bin/.gitkeep
+.phpunit.result.cache
+.database/
+.idea/
+.php_cs.cache
