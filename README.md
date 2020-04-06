@@ -1,4 +1,4 @@
-![alt text](https://travis-ci.org/0m3gaC0d3/jwt-secured-api-core.svg?branch=master "Build status")
+![alt text](https://travis-ci.org/0m3gaC0d3/jwt-secured-api-graphql.svg?branch=master "Build status")
 
 # GraphQL integration for JWT secured API Core
 ...
