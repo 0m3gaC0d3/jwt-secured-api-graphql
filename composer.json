@@ -1,6 +1,6 @@
 {
     "name": "omegacode/jwt-secured-api-graphql",
-    "description": "This packed extends jwt-secured-api by a graphql implementation.",
+    "description": "This package extends jwt-secured-api by a graphql implementation.",
     "homepage": "https://github.com/0m3gaC0d3/jwt-secured-api-graphql",
     "license": "MIT",
     "authors": [
