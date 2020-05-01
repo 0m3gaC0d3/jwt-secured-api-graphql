@@ -38,11 +38,7 @@ use OmegaCode\JwtSecuredApiGraphQL\GraphQL\ResolverRegistry;
 
 class SchemaProvider implements SchemaProviderInterface
 {
-    protected const CACHE_DIR = __DIR__ . '/../../var/cache/';
-
-    protected const SCHEMA_FILE = __DIR__ . '/../../res/graphql/schema.graphql';
-
-    protected const CACHE_FILE_NAME = 'cached_schema.php';
+    protected const SCHEMA_FILE = __DIR__ . '/../../../res/graphql/schema.graphql';
 
     private ResolverRegistry $resolverRegistry;
 

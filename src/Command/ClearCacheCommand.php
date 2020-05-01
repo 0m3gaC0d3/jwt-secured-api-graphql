@@ -24,14 +24,27 @@
  * SOFTWARE.
  */
 
-namespace OmegaCode\JwtSecuredApiGraphQL;
+declare(strict_types=1);
 
-use OmegaCode\JwtSecuredApiCore\Extension\KernelExtension;
+namespace OmegaCode\JwtSecuredApiGraphQL\Command;
 
-class Kernel extends KernelExtension
+use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Provider\SchemaProvider;
+
+class ClearCacheCommand extends \OmegaCode\JwtSecuredApiCore\Command\ClearCacheCommand
 {
-    public function getConfigDirectory(): string
+    protected static $defaultName = 'cache:clear';
+
+    protected function clearAllCache(): void
     {
-        return __DIR__ . '/../conf';
+        parent::clearAllCache();
+        $this->removeCachedSchemaFile();
+    }
+
+    protected function removeCachedSchemaFile(): void
+    {
+        $cacheFilePath = SchemaProvider::CACHE_DIR . SchemaProvider::CACHE_FILE_NAME;
+        if (file_exists($cacheFilePath)) {
+            unlink($cacheFilePath);
+        }
     }
 }

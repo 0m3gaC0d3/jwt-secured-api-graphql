@@ -13,3 +13,5 @@ services:
 
   OmegaCode\JwtSecuredApiGraphQL\GraphQL\ResolverRegistry:
 
+  OmegaCode\JwtSecuredApiGraphQL\Command\ClearCacheCommand:
+    decorates: 'OmegaCode\JwtSecuredApiCore\Command\ClearCacheCommand'

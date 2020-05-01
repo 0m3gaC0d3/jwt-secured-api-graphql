@@ -24,6 +24,8 @@
  * SOFTWARE.
  */
 
+declare(strict_types=1);
+
 namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL\Resolver;
 
 use GraphQL\Type\Definition\ResolveInfo;
