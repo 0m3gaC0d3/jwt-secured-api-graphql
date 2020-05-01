@@ -32,5 +32,9 @@ use GraphQL\Type\Schema;
 
 interface SchemaProviderInterface
 {
+    public const CACHE_DIR = APP_ROOT_PATH . '/var/cache/';
+
+    public const CACHE_FILE_NAME = 'cached_schema.php';
+
     public function buildSchema(): Schema;
 }

@@ -36,7 +36,10 @@ class RequestValidator
 {
     public function validate(RequestInterface $request, array $body): void
     {
-        if (!$request->hasHeader('Content-Type') || $request->getHeader('Content-Type')[0] !== 'application/json') {
+        if (
+            !$request->hasHeader('Content-Type') ||
+            strpos($request->getHeader('Content-Type')[0], 'application/json') === false
+        ) {
             throw new InvalidArgumentException("The request must contain header 'Content-Type' with value 'application/json'");
         }
         if (!isset($body['query']) || empty($body['query'])) {

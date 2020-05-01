@@ -14,7 +14,7 @@
         "php": ">=7.4",
         "webonyx/graphql-php": "0.13.*",
         "overblog/dataloader-php": "0.5.*",
-        "omegacode/jwt-secured-api-core": "^0.4",
+        "omegacode/jwt-secured-api-core": "*",
         "react/promise": "2.7.*"
     },
     "require-dev": {
@@ -58,5 +58,10 @@
         "quality": [
             "./.ci/scripts/ciRunner.sh -s quality"
         ]
+    },
+    "extra": {
+        "jwt-secured-api": {
+            "conf-dir": "conf"
+        }
     }
 }

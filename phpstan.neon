@@ -3,3 +3,5 @@ parameters:
     checkGenericClassInNonGenericObjectType: false
     excludes_analyse:
         - 'src/Configuration/RouteConfiguration.php'
+    ignoreErrors:
+        - '#Constant APP_ROOT_PATH not found#'

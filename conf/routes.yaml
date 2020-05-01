@@ -6,3 +6,4 @@ routes:
     action: OmegaCode\JwtSecuredApiGraphQL\Action\GraphQL\IndexAction
     middlewares:
       - OmegaCode\JwtSecuredApiGraphQL\Middleware\SchemaResolverInjectionMiddleware
+      - OmegaCode\JwtSecuredApiCore\Middleware\CacheableJSONMiddleware
