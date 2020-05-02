@@ -28,7 +28,7 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiGraphQL\Event;
 
-use OmegaCode\JwtSecuredApiGraphQL\GraphQL\ResolverRegistry;
+use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry\ResolverRegistry;
 use Symfony\Contracts\EventDispatcher\Event;
 
 class ResolverCollectedEvent extends Event

@@ -33,10 +33,7 @@ use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Context;
 
 class QueryResolver implements ResolverInterface
 {
-    /**
-     * @param mixed $root
-     */
-    public function __invoke($root, array $args, Context $context, ResolveInfo $info): ?string
+    public function __invoke($root, array $args, Context $context, ResolveInfo $info)
     {
         if ($info->fieldName === 'greet') {
             $name = strip_tags($args['name']);
