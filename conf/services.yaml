@@ -5,13 +5,15 @@ services:
     public: true
   OmegaCode\JwtSecuredApiGraphQL\:
     resource: '../src/*'
-    exclude: '../src/{GraphQL},Kernel.php'
+    exclude: '../src/{GraphQL,Event},Kernel.php'
 
   OmegaCode\JwtSecuredApiGraphQL\Action\GraphQL\IndexAction:
     arguments:
       $container: '@service_container'
 
-  OmegaCode\JwtSecuredApiGraphQL\GraphQL\ResolverRegistry:
+  OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry\ResolverRegistry:
+
+  OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry\DataLoaderRegistry:
 
   OmegaCode\JwtSecuredApiGraphQL\Command\ClearCacheCommand:
     decorates: 'OmegaCode\JwtSecuredApiCore\Command\ClearCacheCommand'

@@ -26,55 +26,62 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL;
+namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry;
 
 use InvalidArgumentException;
-use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Resolver\ResolverInterface;
 
-class ResolverRegistry
+abstract class AbstractRegistry
 {
+    protected array $items = [];
+
+    protected string $type;
+
+    public function __construct(string $type)
+    {
+        $this->type = $type;
+    }
+
     /**
-     * @var array<ResolverInterface>
+     * @param mixed $item
      */
-    private array $resolvers = [];
-
-    public function addResolver(ResolverInterface $resolver): void
+    public function add($item, string $key): void
     {
-        if (empty($resolver->getType())) {
-            throw new InvalidArgumentException('Method getType of given resolver can not be empty!');
+        if (!$item instanceof $this->type) {
+            throw new InvalidArgumentException("The given item is not of configuraed type \"$this->type\"");
         }
-        if (!is_callable($resolver)) {
-            throw new InvalidArgumentException('The given resolver ' . $resolver->getType() . ' is not callable! Add method __invoke to the resolver');
+        if (array_key_exists($key, $this->items)) {
+            throw new InvalidArgumentException("The given key \"$key\" already is present");
         }
-        $this->resolvers[$resolver->getType()] = $resolver;
+        $this->items[$key] = $item;
     }
 
-    public function removeResolver(string $type): void
+    public function remove(string $key): void
     {
-        if (array_key_exists($type, $this->resolvers)) {
-            unset($this->resolvers[$type]);
+        if (!array_key_exists($key, $this->items)) {
+            throw new InvalidArgumentException("The given key \"$key\" does not exist");
         }
+        unset($this->items[$key]);
     }
 
-    public function getResolverByType(string $type): ResolverInterface
+    /**
+     * @return mixed
+     */
+    public function get(string $key)
     {
-        $resolver = $this->resolvers[$type] ?? null;
-        if (!$resolver instanceof ResolverInterface) {
-            throw new InvalidArgumentException("There is no resolver with type $type registered!");
+        if (!array_key_exists($key, $this->items)) {
+            throw new InvalidArgumentException("The given key \"$key\" does not exist");
         }
 
-        return $resolver;
+        return $this->items[$key];
     }
 
-    public function hasResolverForType(string $type): bool
+    public function has(string $key): bool
     {
-        $resolver = $this->resolvers[$type] ?? null;
-
-        return $resolver instanceof ResolverInterface;
+        return array_key_exists($key, $this->items);
     }
 
     public function clear(): void
     {
-        $this->resolvers = [];
+        $this->items = [];
     }
 }

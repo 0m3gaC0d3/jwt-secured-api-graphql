@@ -26,47 +26,12 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL;
+namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL\DataLoader;
 
-use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry\DataLoaderRegistry;
-use Psr\Container\ContainerInterface;
-use Psr\Http\Message\RequestInterface;
+use Overblog\DataLoader\DataLoader;
+use Overblog\PromiseAdapter\PromiseAdapterInterface;
 
-class Context
+interface DataLoaderBuilderInterface
 {
-    protected ContainerInterface $container;
-
-    protected RequestInterface $request;
-
-    protected DataLoaderRegistry $dataLoaderRegistry;
-
-    public function getContainer(): ContainerInterface
-    {
-        return $this->container;
-    }
-
-    public function setContainer(ContainerInterface $container): void
-    {
-        $this->container = $container;
-    }
-
-    public function getRequest(): RequestInterface
-    {
-        return $this->request;
-    }
-
-    public function setRequest(RequestInterface $request): void
-    {
-        $this->request = $request;
-    }
-
-    public function getDataLoaderRegistry(): DataLoaderRegistry
-    {
-        return $this->dataLoaderRegistry;
-    }
-
-    public function setDataLoaderRegistry(DataLoaderRegistry $dataLoaderRegistry): void
-    {
-        $this->dataLoaderRegistry = $dataLoaderRegistry;
-    }
+    public static function build(PromiseAdapterInterface $promiseAdapter): DataLoader;
 }

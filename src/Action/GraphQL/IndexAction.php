@@ -31,13 +31,19 @@ namespace OmegaCode\JwtSecuredApiGraphQL\Action\GraphQL;
 use GraphQL\Error\FormattedError;
 use GraphQL\GraphQL;
 use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
+use OmegaCode\JwtSecuredApiGraphQL\Event\DataLoaderCollectedEvent;
 use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Context;
 use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Provider\SchemaProviderInterface;
+use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry\DataLoaderRegistry;
 use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Utility\DebugUtility;
 use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Validator\RequestValidator;
+use Overblog\PromiseAdapter\Adapter\ReactPromiseAdapter;
+use Overblog\PromiseAdapter\PromiseAdapterInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class IndexAction extends AbstractAction
 {
@@ -45,20 +51,27 @@ class IndexAction extends AbstractAction
 
     protected SchemaProviderInterface $schemaProvider;
 
+    protected EventDispatcher $eventDispatcher;
+
+    protected DataLoaderRegistry $dataLoaderRegistry;
+
     public function __construct(
         ContainerInterface $container,
-        SchemaProviderInterface $schemaProvider
+        SchemaProviderInterface $schemaProvider,
+        EventDispatcher $eventDispatcher,
+        DataLoaderRegistry $dataLoaderRegistry
     ) {
         $this->container = $container;
         $this->schemaProvider = $schemaProvider;
+        $this->eventDispatcher = $eventDispatcher;
+        $this->dataLoaderRegistry = $dataLoaderRegistry;
     }
 
     public function __invoke(Request $request, Response $response): Response
     {
         $debug = DebugUtility::getDebugFlagByEnv();
-        $appContext = new Context();
-        $appContext->setContainer($this->container);
-        $appContext->setRequest($request);
+        $promiseAdapter = new ReactPromiseAdapter();
+        $this->dispatchDataLoaderEvent($promiseAdapter);
         try {
             (new RequestValidator())->validate($request, (array) $request->getParsedBody());
             $data = (array) $request->getParsedBody();
@@ -66,7 +79,7 @@ class IndexAction extends AbstractAction
                 $this->schemaProvider->buildSchema(),
                 $data['query'] ?? '',
                 null,
-                $appContext,
+                $this->buildContext($request),
                 $data['variables'] ?? []
             );
             $output = $result->toArray($debug);
@@ -81,5 +94,22 @@ class IndexAction extends AbstractAction
         $response = $response->withStatus($httpStatus)->withHeader('Content-type', 'application/json');
 
         return $response;
+    }
+
+    protected function buildContext(RequestInterface $request): Context
+    {
+        $context = new Context();
+        $context->setContainer($this->container);
+        $context->setRequest($request);
+        $context->setDataLoaderRegistry($this->dataLoaderRegistry);
+
+        return $context;
+    }
+
+    protected function dispatchDataLoaderEvent(PromiseAdapterInterface $promiseAdapter): void
+    {
+        $event = new DataLoaderCollectedEvent($this->dataLoaderRegistry);
+        $event->setPromiseAdapter($promiseAdapter);
+        $this->eventDispatcher->dispatch($event, DataLoaderCollectedEvent::NAME);
     }
 }

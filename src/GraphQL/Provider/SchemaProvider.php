@@ -34,7 +34,7 @@ use GraphQL\Language\Parser;
 use GraphQL\Type\Schema;
 use GraphQL\Utils\AST;
 use GraphQL\Utils\BuildSchema;
-use OmegaCode\JwtSecuredApiGraphQL\GraphQL\ResolverRegistry;
+use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry\ResolverRegistry;
 
 class SchemaProvider implements SchemaProviderInterface
 {
@@ -76,10 +76,10 @@ class SchemaProvider implements SchemaProviderInterface
         $resolverRegistry = $this->resolverRegistry;
         $typeConfigDecorator = function (&$typeConfig) use ($resolverRegistry) {
             $type = $typeConfig['name'];
-            if (!$resolverRegistry->hasResolverForType($type)) {
+            if (!$resolverRegistry->has($type)) {
                 return $typeConfig;
             }
-            $resolver = $resolverRegistry->getResolverByType($type);
+            $resolver = $resolverRegistry->get($type);
             $typeConfig['resolveField'] = $resolver;
 
             return $typeConfig;

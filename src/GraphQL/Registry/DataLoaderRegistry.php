@@ -26,47 +26,16 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL;
+namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry;
 
-use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry\DataLoaderRegistry;
-use Psr\Container\ContainerInterface;
-use Psr\Http\Message\RequestInterface;
+use Overblog\DataLoader\DataLoader;
 
-class Context
+class DataLoaderRegistry extends AbstractRegistry
 {
-    protected ContainerInterface $container;
+    public const TYPE = DataLoader::class;
 
-    protected RequestInterface $request;
-
-    protected DataLoaderRegistry $dataLoaderRegistry;
-
-    public function getContainer(): ContainerInterface
+    public function __construct()
     {
-        return $this->container;
-    }
-
-    public function setContainer(ContainerInterface $container): void
-    {
-        $this->container = $container;
-    }
-
-    public function getRequest(): RequestInterface
-    {
-        return $this->request;
-    }
-
-    public function setRequest(RequestInterface $request): void
-    {
-        $this->request = $request;
-    }
-
-    public function getDataLoaderRegistry(): DataLoaderRegistry
-    {
-        return $this->dataLoaderRegistry;
-    }
-
-    public function setDataLoaderRegistry(DataLoaderRegistry $dataLoaderRegistry): void
-    {
-        $this->dataLoaderRegistry = $dataLoaderRegistry;
+        parent::__construct(self::TYPE);
     }
 }

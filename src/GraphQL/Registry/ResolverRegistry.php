@@ -26,47 +26,31 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL;
+namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry;
 
-use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry\DataLoaderRegistry;
-use Psr\Container\ContainerInterface;
-use Psr\Http\Message\RequestInterface;
+use InvalidArgumentException;
+use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Resolver\ResolverInterface;
 
-class Context
+class ResolverRegistry extends AbstractRegistry
 {
-    protected ContainerInterface $container;
+    public const TYPE = ResolverInterface::class;
 
-    protected RequestInterface $request;
-
-    protected DataLoaderRegistry $dataLoaderRegistry;
-
-    public function getContainer(): ContainerInterface
+    public function __construct()
     {
-        return $this->container;
+        parent::__construct(self::TYPE);
     }
 
-    public function setContainer(ContainerInterface $container): void
+    /**
+     * @param ResolverInterface $item
+     */
+    public function add($item, string $key): void
     {
-        $this->container = $container;
-    }
-
-    public function getRequest(): RequestInterface
-    {
-        return $this->request;
-    }
-
-    public function setRequest(RequestInterface $request): void
-    {
-        $this->request = $request;
-    }
-
-    public function getDataLoaderRegistry(): DataLoaderRegistry
-    {
-        return $this->dataLoaderRegistry;
-    }
-
-    public function setDataLoaderRegistry(DataLoaderRegistry $dataLoaderRegistry): void
-    {
-        $this->dataLoaderRegistry = $dataLoaderRegistry;
+        if (empty($item->getType())) {
+            throw new InvalidArgumentException('Method getType of given resolver can not be empty!');
+        }
+        if (!is_callable($item)) {
+            throw new InvalidArgumentException('The given resolver ' . $item->getType() . ' is not callable! Add method __invoke to the resolver');
+        }
+        parent::add($item, $key);
     }
 }

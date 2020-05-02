@@ -26,47 +26,37 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL;
+namespace OmegaCode\JwtSecuredApiGraphQL\Event;
 
 use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry\DataLoaderRegistry;
-use Psr\Container\ContainerInterface;
-use Psr\Http\Message\RequestInterface;
+use Overblog\PromiseAdapter\PromiseAdapterInterface;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class Context
+class DataLoaderCollectedEvent extends Event
 {
-    protected ContainerInterface $container;
+    public const NAME = 'graphql.data_loader_registry.collected';
 
-    protected RequestInterface $request;
+    protected DataLoaderRegistry $registry;
 
-    protected DataLoaderRegistry $dataLoaderRegistry;
+    protected PromiseAdapterInterface $promiseAdapter;
 
-    public function getContainer(): ContainerInterface
+    public function __construct(DataLoaderRegistry $registry)
     {
-        return $this->container;
+        $this->registry = $registry;
     }
 
-    public function setContainer(ContainerInterface $container): void
+    public function getRegistry(): DataLoaderRegistry
     {
-        $this->container = $container;
+        return $this->registry;
     }
 
-    public function getRequest(): RequestInterface
+    public function setPromiseAdapter(PromiseAdapterInterface $promiseAdapter): void
     {
-        return $this->request;
+        $this->promiseAdapter = $promiseAdapter;
     }
 
-    public function setRequest(RequestInterface $request): void
+    public function getPromiseAdapter(): PromiseAdapterInterface
     {
-        $this->request = $request;
-    }
-
-    public function getDataLoaderRegistry(): DataLoaderRegistry
-    {
-        return $this->dataLoaderRegistry;
-    }
-
-    public function setDataLoaderRegistry(DataLoaderRegistry $dataLoaderRegistry): void
-    {
-        $this->dataLoaderRegistry = $dataLoaderRegistry;
+        return $this->promiseAdapter;
     }
 }

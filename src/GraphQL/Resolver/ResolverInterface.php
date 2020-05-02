@@ -28,7 +28,17 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL\Resolver;
 
+use GraphQL\Type\Definition\ResolveInfo;
+use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Context;
+
 interface ResolverInterface
 {
+    /**
+     * @param mixed $parent
+     *
+     * @return mixed
+     */
+    public function __invoke($parent, array $args, Context $context, ResolveInfo $info);
+
     public function getType(): string;
 }

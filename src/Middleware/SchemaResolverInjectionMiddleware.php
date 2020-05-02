@@ -29,8 +29,8 @@ declare(strict_types=1);
 namespace OmegaCode\JwtSecuredApiGraphQL\Middleware;
 
 use OmegaCode\JwtSecuredApiGraphQL\Event\ResolverCollectedEvent;
+use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry\ResolverRegistry;
 use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Resolver\QueryResolver;
-use OmegaCode\JwtSecuredApiGraphQL\GraphQL\ResolverRegistry;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -51,7 +51,7 @@ class SchemaResolverInjectionMiddleware implements \Psr\Http\Server\MiddlewareIn
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $queryResolver = new QueryResolver();
-        $this->resolverRegistry->addResolver($queryResolver);
+        $this->resolverRegistry->add($queryResolver, $queryResolver->getType());
         $this->eventDispatcher->dispatch(
             new ResolverCollectedEvent($this->resolverRegistry),
             ResolverCollectedEvent::NAME
