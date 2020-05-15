@@ -12,6 +12,8 @@ setUpDockerComposeDotEnv() {
   echo "PHP_VERSION=${PHP_VERSION}" >>.env
 }
 
+export APP_ENV="test"
+
 # Function to get the real path on mac os.
 realpath() {
   if ! pushd $1 &>/dev/null; then
@@ -35,6 +37,7 @@ Options:
             - build: Builds the project (composer)
             - lint: Lints the php files
             - unit (default): PHP unit tests
+            - e2e: End to end tests
             - quality: executes code quality checks (phpstan, phpcs, phpmd)
             - find-debugs: Finds usages of debug calls.
 
@@ -127,6 +130,9 @@ else
   unit)
     TEST_FILE="${ROOT_DIR}/tests/Unit"
     ;;
+  e2e)
+    TEST_FILE="${ROOT_DIR}/tests/Api"
+    ;;
   esac
 fi
 
@@ -153,6 +159,12 @@ php-fix)
 unit)
   setUpDockerComposeDotEnv
   docker-compose run unit
+  SUITE_EXIT_CODE=$?
+  docker-compose down
+  ;;
+e2e)
+  setUpDockerComposeDotEnv
+  docker-compose run e2e
   SUITE_EXIT_CODE=$?
   docker-compose down
   ;;
