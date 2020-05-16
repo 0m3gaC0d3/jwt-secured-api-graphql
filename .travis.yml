@@ -27,3 +27,7 @@ script:
   - >
     echo "Running unit tests";
     .ci/scripts/ciRunner.sh -s unit -p $TRAVIS_PHP_VERSION
+
+  - >
+    echo "Running end to end tests";
+    .ci/scripts/ciRunner.sh -s e2e -p $TRAVIS_PHP_VERSION

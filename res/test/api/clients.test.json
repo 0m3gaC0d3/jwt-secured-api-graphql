@@ -1,0 +1,9 @@
+{
+    "clients": [
+        {
+            "ip": null,
+            "secret": "1234",
+            "permissions": []
+        }
+    ]
+}

@@ -43,7 +43,7 @@ services:
     command: >
       /bin/sh -c "
           echo \"Fix php-cs-fixer errors\";
-          bin/php-cs-fixer fix --allow-risky=yes
+          vendor/bin/php-cs-fixer fix --allow-risky=yes
       "
   #======================================================
   # Quality
@@ -56,13 +56,13 @@ services:
     command: >
       /bin/sh -c "
           echo \"Running phpcs...\";
-          bin/phpcs --error-severity=1 --warning-severity=8 --extensions=php src;
+          vendor/bin/phpcs --error-severity=1 --warning-severity=8 --extensions=php src;
           echo \"Running php-cs-fixer...\";
-          bin/php-cs-fixer fix --dry-run --diff --allow-risky=yes
+          vendor/bin/php-cs-fixer fix --dry-run --diff --allow-risky=yes
           echo \"Running phpmd...\";
-          bin/phpmd src text phpmd.xml;
+          vendor/bin/phpmd src text phpmd.xml;
           echo \"Running phpstan...\";
-          bin/phpstan analyse -c phpstan.neon --autoload-file=vendor/autoload.php -l max src
+          vendor/bin/phpstan analyse -c phpstan.neon --autoload-file=vendor/autoload.php -l max src
       "
   #======================================================
   # Unit tests
@@ -74,5 +74,35 @@ services:
     working_dir: ${ROOT_DIR}
     command: >
       /bin/sh -c "
-          php bin/phpunit -c phpunit.xml tests;
+          php vendor/bin/phpunit -c phpunit.xml tests/Unit;
       "
+  #======================================================
+  # end to end tests
+  #======================================================
+  e2e:
+    image: php:${PHP_VERSION}-alpine
+    links:
+      - api
+    depends_on:
+      - api
+    volumes:
+      - ${ROOT_DIR}:${ROOT_DIR}
+    working_dir: ${ROOT_DIR}
+    command: >
+      /bin/sh -c "
+          php vendor/bin/phpunit -c res/test/api/api.phpunit.xml tests/Api;
+      "
+  #======================================================
+  # api
+  #======================================================
+  api:
+    container_name: api
+    image: omegacode/jwt-secured-api-web-server:1.0
+    volumes:
+      - ${ROOT_DIR}:/var/www/html
+    ports:
+      - 80:80
+    environment:
+      - PRIVATE_KEY
+      - PUBLIC_KEY
+      - APP_ENV
