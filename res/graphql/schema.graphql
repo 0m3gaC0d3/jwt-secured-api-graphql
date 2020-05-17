@@ -1,7 +1,8 @@
 schema {
     query: Query
 }
-
+# Basic example of a graphql query.
 type Query {
+    # Greets a person.
     greet(name: String!): String
 }
