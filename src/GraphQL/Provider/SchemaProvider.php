@@ -52,25 +52,27 @@ class SchemaProvider implements SchemaProviderInterface
         /** @var DocumentNode $source */
         $source = $this->getSchemaSource();
 
-        return BuildSchema::build($source, $this->buildTypeConfiguration());
+        return BuildSchema::build($source, $this->buildTypeConfiguration(), ['commentDescriptions' => true]);
     }
 
     private function getSchemaSource(): Node
     {
         $cacheFilePath = static::CACHE_DIR . static::CACHE_FILE_NAME;
-        if (!file_exists($cacheFilePath)) {
-            $document = Parser::parse((string) file_get_contents(static::SCHEMA_FILE));
-            if ((bool) $_ENV['ENABLE_GRAPHQL_SCHEMA_CACHE']) {
-                file_put_contents(
-                    $cacheFilePath,
-                    "<?php\nreturn " . var_export(AST::toArray($document), true) . ";\n"
-                );
-            }
-
-            return $document;
+        // @TODO Use symfony cache to store AST
+        if (file_exists($cacheFilePath) && (bool) $_ENV['ENABLE_GRAPHQL_SCHEMA_CACHE']) {
+            // Load AST from cached PHP file: var/cache/cached_schema.php
+            return AST::fromArray(require $cacheFilePath);
+        }
+        $document = Parser::parse((string) file_get_contents(static::SCHEMA_FILE));
+        if ((bool) $_ENV['ENABLE_GRAPHQL_SCHEMA_CACHE']) {
+            // Save AST as PHP file: var/cache/cached_schema.php
+            file_put_contents(
+                $cacheFilePath,
+                "<?php\nreturn " . var_export(AST::toArray($document), true) . ";\n"
+            );
         }
 
-        return AST::fromArray(require static::CACHE_DIR . static::CACHE_FILE_NAME);
+        return $document;
     }
 
     private function buildTypeConfiguration(): callable
