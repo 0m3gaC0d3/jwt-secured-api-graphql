@@ -5,7 +5,7 @@ services:
     public: true
   OmegaCode\JwtSecuredApiGraphQL\:
     resource: '../src/*'
-    exclude: '../src/{GraphQL,Event},Kernel.php'
+    exclude: '../src/{Event,Kernel.php}'
 
   OmegaCode\JwtSecuredApiGraphQL\Action\GraphQL\IndexAction:
     arguments:

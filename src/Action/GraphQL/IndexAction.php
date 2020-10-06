@@ -32,6 +32,7 @@ use GraphQL\Error\FormattedError;
 use GraphQL\GraphQL;
 use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
 use OmegaCode\JwtSecuredApiGraphQL\Event\DataLoaderCollectedEvent;
+use OmegaCode\JwtSecuredApiGraphQL\Event\GraphQLResponseCreatedEvent;
 use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Context;
 use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Provider\SchemaProviderInterface;
 use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry\DataLoaderRegistry;
@@ -90,6 +91,7 @@ class IndexAction extends AbstractAction
                 FormattedError::createFromException($error, $debug),
             ];
         }
+        $output = $this->dispatchGraphQLResponseCreatedEvent($output);
         $response->getBody()->write((string) json_encode($output));
         $response = $response->withStatus($httpStatus)->withHeader('Content-type', 'application/json');
 
@@ -111,5 +113,14 @@ class IndexAction extends AbstractAction
         $event = new DataLoaderCollectedEvent($this->dataLoaderRegistry);
         $event->setPromiseAdapter($promiseAdapter);
         $this->eventDispatcher->dispatch($event, DataLoaderCollectedEvent::NAME);
+    }
+
+    protected function dispatchGraphQLResponseCreatedEvent(array $output): array
+    {
+        $event = new GraphQLResponseCreatedEvent($output);
+        /** @var GraphQLResponseCreatedEvent $handledEvent */
+        $handledEvent = $this->eventDispatcher->dispatch($event, GraphQLResponseCreatedEvent::NAME);
+
+        return $handledEvent->getOutput();
     }
 }
