@@ -28,7 +28,6 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiGraphQL\Action\GraphQL;
 
-use GraphQL\Error\FormattedError;
 use GraphQL\GraphQL;
 use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
 use OmegaCode\JwtSecuredApiGraphQL\Event\DataLoaderCollectedEvent;
@@ -38,6 +37,7 @@ use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Provider\SchemaProviderInterface;
 use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry\DataLoaderRegistry;
 use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Utility\DebugUtility;
 use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Validator\RequestValidator;
+use OmegaCode\JwtSecuredApiGraphQL\Service\GraphQLErrorFormatterServiceInterface;
 use Overblog\PromiseAdapter\Adapter\ReactPromiseAdapter;
 use Overblog\PromiseAdapter\PromiseAdapterInterface;
 use Psr\Container\ContainerInterface;
@@ -56,16 +56,20 @@ class IndexAction extends AbstractAction
 
     protected DataLoaderRegistry $dataLoaderRegistry;
 
+    protected GraphQLErrorFormatterServiceInterface $errorFormatter;
+
     public function __construct(
         ContainerInterface $container,
         SchemaProviderInterface $schemaProvider,
         EventDispatcher $eventDispatcher,
-        DataLoaderRegistry $dataLoaderRegistry
+        DataLoaderRegistry $dataLoaderRegistry,
+        GraphQLErrorFormatterServiceInterface $errorFormatter
     ) {
         $this->container = $container;
         $this->schemaProvider = $schemaProvider;
         $this->eventDispatcher = $eventDispatcher;
         $this->dataLoaderRegistry = $dataLoaderRegistry;
+        $this->errorFormatter = $errorFormatter;
     }
 
     public function __invoke(Request $request, Response $response): Response
@@ -85,11 +89,9 @@ class IndexAction extends AbstractAction
             );
             $output = $result->toArray($debug);
             $httpStatus = 200;
-        } catch (\Exception $error) {
+        } catch (\Exception $exception) {
             $httpStatus = 500;
-            $output['errors'] = [
-                FormattedError::createFromException($error, $debug),
-            ];
+            $output['errors'] = $this->errorFormatter->format($exception, $debug);
         }
         $output = $this->dispatchGraphQLResponseCreatedEvent($output);
         $response->getBody()->write((string) json_encode($output));

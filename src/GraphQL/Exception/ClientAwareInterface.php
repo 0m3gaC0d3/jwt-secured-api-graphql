@@ -26,24 +26,11 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL\Validator;
+namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL\Exception;
 
-use InvalidArgumentException;
-use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Exception\EmptyQueryException;
-use Psr\Http\Message\RequestInterface;
+use GraphQL\Error\ClientAware;
 
-class RequestValidator
+interface ClientAwareInterface extends ClientAware
 {
-    public function validate(RequestInterface $request, array $body): void
-    {
-        if (
-            !$request->hasHeader('Content-Type') ||
-            strpos($request->getHeader('Content-Type')[0], 'application/json') === false
-        ) {
-            throw new InvalidArgumentException("The request must contain header 'Content-Type' with value 'application/json'");
-        }
-        if (!isset($body['query']) || empty($body['query'])) {
-            throw new EmptyQueryException('Query can not be empty');
-        }
-    }
+    public function getExceptionType(): string;
 }
