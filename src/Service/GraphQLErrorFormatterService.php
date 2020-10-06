@@ -26,24 +26,36 @@
 
 declare(strict_types=1);
 
-namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL\Validator;
+namespace OmegaCode\JwtSecuredApiGraphQL\Service;
 
-use InvalidArgumentException;
-use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Exception\EmptyQueryException;
-use Psr\Http\Message\RequestInterface;
+use Exception;
+use GraphQL\Error\FormattedError;
+use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Exception\ClientAwareInterface;
 
-class RequestValidator
+class GraphQLErrorFormatterService extends FormattedError implements GraphQLErrorFormatterServiceInterface
 {
-    public function validate(RequestInterface $request, array $body): void
+    /**
+     * @param bool|int $debugFlags
+     * @param ?string  $internalErrorMessage
+     */
+    public function format(Exception $exception, $debugFlags = false, ?string $internalErrorMessage = null): array
     {
-        if (
-            !$request->hasHeader('Content-Type') ||
-            strpos($request->getHeader('Content-Type')[0], 'application/json') === false
-        ) {
-            throw new InvalidArgumentException("The request must contain header 'Content-Type' with value 'application/json'");
+        return [
+            $this->formatException($exception, $debugFlags),
+        ];
+    }
+
+    /**
+     * @param bool|int $debugFlags
+     * @param ?string  $internalErrorMessage
+     */
+    protected static function formatException(Exception $e, $debugFlags, ?string $internalErrorMessage = null): array
+    {
+        $formattedError = parent::createFromException($e, $debugFlags, $internalErrorMessage);
+        if ($e instanceof ClientAwareInterface && $e->isClientSafe()) {
+            $formattedError['type'] = $e->getExceptionType();
         }
-        if (!isset($body['query']) || empty($body['query'])) {
-            throw new EmptyQueryException('Query can not be empty');
-        }
+
+        return $formattedError;
     }
 }
