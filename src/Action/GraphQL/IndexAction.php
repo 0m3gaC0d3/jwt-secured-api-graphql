@@ -28,7 +28,8 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiGraphQL\Action\GraphQL;
 
-use GraphQL\GraphQL;
+use GraphQL\Server\ServerConfig;
+use GraphQL\Server\StandardServer;
 use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
 use OmegaCode\JwtSecuredApiGraphQL\Event\DataLoaderCollectedEvent;
 use OmegaCode\JwtSecuredApiGraphQL\Event\GraphQLResponseCreatedEvent;
@@ -38,7 +39,8 @@ use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Registry\DataLoaderRegistry;
 use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Utility\DebugUtility;
 use OmegaCode\JwtSecuredApiGraphQL\GraphQL\Validator\RequestValidator;
 use OmegaCode\JwtSecuredApiGraphQL\Service\GraphQLErrorFormatterServiceInterface;
-use Overblog\PromiseAdapter\Adapter\ReactPromiseAdapter;
+use Overblog\DataLoader\Promise\Adapter\Webonyx\GraphQL\SyncPromiseAdapter;
+use Overblog\PromiseAdapter\Adapter\WebonyxGraphQLSyncPromiseAdapter;
 use Overblog\PromiseAdapter\PromiseAdapterInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
@@ -75,29 +77,33 @@ class IndexAction extends AbstractAction
     public function __invoke(Request $request, Response $response): Response
     {
         $debug = DebugUtility::getDebugFlagByEnv();
-        $promiseAdapter = new ReactPromiseAdapter();
+        $graphQLSyncPromiseAdapter = new SyncPromiseAdapter();
+        $promiseAdapter = new WebonyxGraphQLSyncPromiseAdapter($graphQLSyncPromiseAdapter);
         $this->dispatchDataLoaderEvent($promiseAdapter);
         try {
             (new RequestValidator())->validate($request, (array) $request->getParsedBody());
-            $data = (array) $request->getParsedBody();
-            $result = GraphQL::executeQuery(
-                $this->schemaProvider->buildSchema(),
-                $data['query'] ?? '',
-                null,
-                $this->buildContext($request),
-                $data['variables'] ?? []
-            );
-            $output = $result->toArray($debug);
-            $httpStatus = 200;
+            $schema = $this->schemaProvider->buildSchema();
+            $context = $this->buildContext($request);
+            $config = ServerConfig::create()
+                ->setSchema($schema)
+                ->setContext($context)
+                ->setQueryBatching(true)
+                ->setPromiseAdapter($graphQLSyncPromiseAdapter);
+            // Create server.
+            $server = new StandardServer($config);
+            /** @var Response $response */
+            $response = $server->processPsrRequest($request, $response, $response->getBody());
+            $response = $this->dispatchGraphQLResponseCreatedEvent($response);
+
+            return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
         } catch (\Exception $exception) {
             $httpStatus = 500;
-            $output['errors'] = $this->errorFormatter->format($exception, $debug);
-        }
-        $output = $this->dispatchGraphQLResponseCreatedEvent($output);
-        $response->getBody()->write((string) json_encode($output));
-        $response = $response->withStatus($httpStatus)->withHeader('Content-type', 'application/json');
+            $response->getBody()->write((string) json_encode([
+                'errors' => $this->errorFormatter->format($exception, $debug),
+            ]));
 
-        return $response;
+            return $response->withStatus($httpStatus)->withHeader('Content-type', 'application/json');
+        }
     }
 
     protected function buildContext(RequestInterface $request): Context
@@ -117,12 +123,12 @@ class IndexAction extends AbstractAction
         $this->eventDispatcher->dispatch($event, DataLoaderCollectedEvent::NAME);
     }
 
-    protected function dispatchGraphQLResponseCreatedEvent(array $output): array
+    protected function dispatchGraphQLResponseCreatedEvent(Response $response): Response
     {
-        $event = new GraphQLResponseCreatedEvent($output);
+        $event = new GraphQLResponseCreatedEvent($response);
         /** @var GraphQLResponseCreatedEvent $handledEvent */
         $handledEvent = $this->eventDispatcher->dispatch($event, GraphQLResponseCreatedEvent::NAME);
 
-        return $handledEvent->getOutput();
+        return $handledEvent->getResponse();
     }
 }

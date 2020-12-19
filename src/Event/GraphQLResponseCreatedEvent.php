@@ -28,26 +28,27 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiGraphQL\Event;
 
+use Psr\Http\Message\ResponseInterface as Response;
 use Symfony\Contracts\EventDispatcher\Event;
 
 class GraphQLResponseCreatedEvent extends Event
 {
     public const NAME = 'graphql.response.created';
 
-    protected array $output;
+    protected Response $response;
 
-    public function __construct(array &$output)
+    public function __construct(Response $response)
     {
-        $this->output = $output;
+        $this->response = $response;
     }
 
-    public function getOutput(): array
+    public function getResponse(): Response
     {
-        return $this->output;
+        return $this->response;
     }
 
-    public function setOutput(array $output): void
+    public function setResponse(Response $response): void
     {
-        $this->output = $output;
+        $this->response = $response;
     }
 }

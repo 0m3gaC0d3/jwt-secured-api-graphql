@@ -10,6 +10,8 @@ setUpDockerComposeDotEnv() {
   echo "ROOT_DIR=${ROOT_DIR}" >>.env
   echo "EXTRA_TEST_OPTIONS=${EXTRA_TEST_OPTIONS}" >>.env
   echo "PHP_VERSION=${PHP_VERSION}" >>.env
+  echo "APP_ENV=test" >>.env
+  echo "TEST_BASE_URL=http://api" >>.env
 }
 
 export APP_ENV="test"
@@ -35,6 +37,7 @@ Options:
     -s <...>
         Specifies which test suite to run
             - build: Builds the project (composer)
+            - fix: runs php-cs-fixer and phpcbf to automatically fix qs errors
             - lint: Lints the php files
             - unit (default): PHP unit tests
             - e2e: End to end tests
@@ -46,11 +49,10 @@ Options:
             - 7.4 (default): use PHP 7.4
 
     -e "<phpunit options>"
-        Only with -s functional|unit
-        Additional options to send to phpunit (unit & functional tests).
+        Only with -s e2e|unit
+        Additional options to send to phpunit (unit & e2e tests).
         Starting with "--" must be added after options starting with "-".
         Example -e "-v --filter canRetrieveValueWithGP" to enable verbose output AND filter tests
-        named "canRetrieveValueWithGP"
 
     -h
         Show this help.
@@ -150,9 +152,9 @@ lint)
   SUITE_EXIT_CODE=$?
   docker-compose down
   ;;
-php-fix)
+fix)
   setUpDockerComposeDotEnv
-  docker-compose run php-fix
+  docker-compose run fix
   SUITE_EXIT_CODE=$?
   docker-compose down
   ;;
