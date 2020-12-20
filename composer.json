@@ -53,8 +53,8 @@
         "lint": [
             "./.ci/scripts/ciRunner.sh -s lint"
         ],
-        "php-fix": [
-            "./.ci/scripts/ciRunner.sh -s php-fix"
+        "fix": [
+            "./.ci/scripts/ciRunner.sh -s fix"
         ],
         "build": [
             "./.ci/scripts/ciRunner.sh -s build"

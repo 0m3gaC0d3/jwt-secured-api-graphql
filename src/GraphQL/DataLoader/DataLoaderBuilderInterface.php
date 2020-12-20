@@ -33,5 +33,5 @@ use Overblog\PromiseAdapter\PromiseAdapterInterface;
 
 interface DataLoaderBuilderInterface
 {
-    public static function build(PromiseAdapterInterface $promiseAdapter): DataLoader;
+    public function build(PromiseAdapterInterface $promiseAdapter): DataLoader;
 }

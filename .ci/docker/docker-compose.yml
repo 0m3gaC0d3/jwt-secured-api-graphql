@@ -33,9 +33,9 @@ services:
           if find ./src/ -type f -name '*.php' -exec php -l {} \; | grep \"Parsing error\"; then exit 1; fi
       "
   #======================================================
-  # PHP fix
+  # Fix
   #======================================================
-  php-fix:
+  fix:
     image: php:${PHP_VERSION}-alpine
     volumes:
       - ${ROOT_DIR}:${ROOT_DIR}
@@ -44,6 +44,7 @@ services:
       /bin/sh -c "
           echo \"Fix php-cs-fixer errors\";
           vendor/bin/php-cs-fixer fix --allow-risky=yes
+          vendor/bin/phpcbf --error-severity=1 --warning-severity=8 --extensions=php
       "
   #======================================================
   # Quality
@@ -74,7 +75,7 @@ services:
     working_dir: ${ROOT_DIR}
     command: >
       /bin/sh -c "
-          php vendor/bin/phpunit -c phpunit.xml tests/Unit;
+          php vendor/bin/phpunit -c phpunit.xml ${TEST_FILE};
       "
   #======================================================
   # end to end tests
@@ -90,14 +91,15 @@ services:
     working_dir: ${ROOT_DIR}
     command: >
       /bin/sh -c "
-          php vendor/bin/phpunit -c res/test/api/api.phpunit.xml tests/Api;
+          php -q > /dev/null -S localhost:8080 -t public/ &
+          php vendor/bin/phpunit -c res/test/api/api.phpunit.xml ${TEST_FILE}
       "
   #======================================================
   # api
   #======================================================
   api:
     container_name: api
-    image: omegacode/jwt-secured-api-web-server:1.0
+    image: omegacode/jwt-secured-api-web-server:1.1
     volumes:
       - ${ROOT_DIR}:/var/www/html
     ports:
