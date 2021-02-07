@@ -28,18 +28,17 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL\Utility;
 
-use ErrorException;
 use GraphQL\Error\Debug;
 
 class DebugUtility
 {
-    public static function getDebugFlagByEnv(): int
+    /**
+     * @return false|int
+     */
+    public static function getDebugFlagByEnv()
     {
-        $flag = 0;
-        if (!empty($_ENV['SHOW_ERRORS'])) {
-            set_error_handler(function ($severity, $message, $file, $line) {
-                throw new ErrorException($message, 0, $severity, $file, $line);
-            });
+        $flag = false;
+        if ((bool) $_ENV['SHOW_ERRORS']) {
             $flag = Debug::INCLUDE_DEBUG_MESSAGE | Debug::INCLUDE_TRACE;
         }
 

@@ -28,6 +28,9 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiGraphQL\Action\GraphQL;
 
+use ErrorException;
+use Exception;
+use GraphQL\Error\FormattedError;
 use GraphQL\Server\ServerConfig;
 use GraphQL\Server\StandardServer;
 use OmegaCode\JwtSecuredApiCore\Action\AbstractAction;
@@ -76,6 +79,9 @@ class IndexAction extends AbstractAction
 
     public function __invoke(Request $request, Response $response): Response
     {
+        set_error_handler(function ($severity, $message, $file, $line) {
+            throw new ErrorException($message, 0, $severity, $file, $line);
+        });
         $debug = DebugUtility::getDebugFlagByEnv();
         $graphQLSyncPromiseAdapter = new SyncPromiseAdapter();
         $promiseAdapter = new WebonyxGraphQLSyncPromiseAdapter($graphQLSyncPromiseAdapter);
@@ -85,18 +91,23 @@ class IndexAction extends AbstractAction
             $schema = $this->schemaProvider->buildSchema();
             $context = $this->buildContext($request);
             $config = ServerConfig::create()
+                ->setDebug((bool) $_ENV['SHOW_ERRORS'])
                 ->setSchema($schema)
                 ->setContext($context)
+                ->setErrorFormatter(function (Exception $error) use ($debug) {
+                    return FormattedError::createFromException($error, $debug);
+                })
                 ->setQueryBatching(true)
                 ->setPromiseAdapter($graphQLSyncPromiseAdapter);
+
             // Create server.
             $server = new StandardServer($config);
             /** @var Response $response */
             $response = $server->processPsrRequest($request, $response, $response->getBody());
             $response = $this->dispatchGraphQLResponseCreatedEvent($response);
 
-            return $response->withStatus(200)->withHeader('Content-Type', 'application/json');
-        } catch (\Exception $exception) {
+            return $response->withStatus($response->getStatusCode())->withHeader('Content-Type', 'application/json');
+        } catch (Exception $exception) {
             $httpStatus = 500;
             $response->getBody()->write((string) json_encode([
                 'errors' => $this->errorFormatter->format($exception, $debug),
