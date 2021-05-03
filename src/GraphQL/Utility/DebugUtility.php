@@ -28,18 +28,15 @@ declare(strict_types=1);
 
 namespace OmegaCode\JwtSecuredApiGraphQL\GraphQL\Utility;
 
-use GraphQL\Error\Debug;
+use GraphQL\Error\DebugFlag;
 
 class DebugUtility
 {
-    /**
-     * @return false|int
-     */
-    public static function getDebugFlagByEnv()
+    public static function getDebugFlagByEnv(): int
     {
-        $flag = false;
+        $flag = DebugFlag::NONE;
         if ((bool) $_ENV['SHOW_ERRORS']) {
-            $flag = Debug::INCLUDE_DEBUG_MESSAGE | Debug::INCLUDE_TRACE;
+            $flag = DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE;
         }
 
         return $flag;
