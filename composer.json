@@ -12,7 +12,7 @@
     "require": {
         "ext-json": "*",
         "php": ">=7.4",
-        "webonyx/graphql-php": "0.13.*",
+        "webonyx/graphql-php": "^v14.6",
         "overblog/dataloader-php": "0.5.*",
         "omegacode/jwt-secured-api-core": "*",
         "react/promise": "2.7.*",

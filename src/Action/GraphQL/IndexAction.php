@@ -91,7 +91,6 @@ class IndexAction extends AbstractAction
             $schema = $this->schemaProvider->buildSchema();
             $context = $this->buildContext($request);
             $config = ServerConfig::create()
-                ->setDebug((bool) $_ENV['SHOW_ERRORS'])
                 ->setSchema($schema)
                 ->setContext($context)
                 ->setErrorFormatter(function (Exception $error) use ($debug) {

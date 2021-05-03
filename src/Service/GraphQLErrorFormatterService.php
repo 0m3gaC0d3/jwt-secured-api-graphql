@@ -41,16 +41,15 @@ class GraphQLErrorFormatterService extends FormattedError implements GraphQLErro
     public function format(Exception $exception, $debugFlags = false, ?string $internalErrorMessage = null): array
     {
         return [
-            $this->formatException($exception, $debugFlags),
+            $this->formatException($exception, (int) $debugFlags),
         ];
     }
 
-    /**
-     * @param bool|int $debugFlags
-     * @param ?string  $internalErrorMessage
-     */
-    protected static function formatException(Exception $e, $debugFlags, ?string $internalErrorMessage = null): array
-    {
+    protected static function formatException(
+        Exception $e,
+        int $debugFlags,
+        ?string $internalErrorMessage = null
+    ): array {
         $formattedError = parent::createFromException($e, $debugFlags, $internalErrorMessage);
         if ($e instanceof ClientAwareInterface && $e->isClientSafe()) {
             $formattedError['type'] = $e->getExceptionType();
